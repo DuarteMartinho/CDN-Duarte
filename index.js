@@ -34,7 +34,7 @@ app.use(function (err, req, res, next) {
 });
 
 app.post(
-  "/:name",
+  "/api/:name",
   bodyParser.raw({ type: ["image/jpeg", "image/png"], limit: "5mb" }),
   multipartMiddleware,
   async function (req, res) {
