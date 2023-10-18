@@ -5,6 +5,9 @@ const url = require("url");
 const Jimp = require("jimp");
 const express = require("express");
 const cors = require("cors");
+var bodyParser = require("body-parser");
+var multipart = require("connect-multiparty");
+var multipartMiddleware = multipart();
 
 const app = express();
 
@@ -16,6 +19,7 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+app.use(bodyParser.json());
 
 app.use(function (err, req, res, next) {
   filePath = path.join(__dirname, process.env.DEFAULT_IMAGE);
@@ -23,25 +27,48 @@ app.use(function (err, req, res, next) {
   res.sendFile(filePath);
 });
 
-app.post("/", async function (req, res) {
-  const file = req.files.file;
-  const fileName = file.name;
-  const filePath = path.join(__dirname, `public/images/${fileName}`);
+app.post(
+  "/:name",
+  bodyParser.raw({ type: ["image/jpeg", "image/png"], limit: "5mb" }),
+  multipartMiddleware,
+  async function (req, res) {
+    console.log(req.files, req.body);
+    const file = req.body;
+    const name = req.params.name;
+    const fileName = name+".png";
+    const filePath = path.join(__dirname, `public/images/${fileName}`);
 
-  file.mv(filePath, (err) => {
-    console.log(err);
-  });
+    fs.writeFile(filePath, file, (error) => {
+      if (error) {
+        throw error;
+      }
+      console.log("File saved!");
+    });
 
-  res.send({
-    status: true,
-    message: "File is uploaded",
-    data: {
-      name: file.name,
-      mimetype: file.mimetype,
-      size: file.size,
-    },
-  });
-});
+    res.sendStatus(200);
+  }
+);
+
+//   res.send({
+//     status: true,
+//     message: "File is uploaded",
+//     data: {
+//       name: file.name,
+//       mimetype: file.mimetype,
+//       size: file.size,
+//     },
+//   });
+
+//   res.send({
+//     status: true,
+//     message: "File is uploaded",
+//     data: {
+//       name: "file.name",
+//       mimetype: "file.mimetype",
+//       size: "file.size",
+//     },
+//   });
+// });
 
 app.get("*", async function (req, res) {
   // Remove headers info
