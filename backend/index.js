@@ -27,13 +27,12 @@ app.use((req, res, next) => {
 });
 
 app.post(
-  "/api/*",
+  "/*",
   bodyParser.raw({ type: ["image/*"], limit: "5mb" }),
   multipartMiddleware,
   async function (req, res) {
     const file = req.body;
     let fileName = url.parse(req.url).pathname;
-    fileName = fileName.replace("/api/", "");
     const filePath = path.join(__dirname, `public/images/${fileName}`);
     const directoryPath = path.dirname(filePath);
 
@@ -84,7 +83,7 @@ app.post(
   }
 );
 
-app.get("/api/*", async function (req, res) {
+app.get("/*", async function (req, res) {
   // Remove headers info
   res.removeHeader("Transfer-Encoding");
   res.removeHeader("X-Powered-By");
@@ -92,7 +91,6 @@ app.get("/api/*", async function (req, res) {
   try {
     const query = url.parse(req.url, true).query;
     let file = url.parse(req.url).pathname;
-    file = file.replace("/api/", "");
     let filePath = path.join(__dirname, `public/images/${file}`);
 
     if (!fs.existsSync(filePath)) {

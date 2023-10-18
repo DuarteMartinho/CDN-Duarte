@@ -58,7 +58,7 @@ function App() {
           </div>
         </div>
 
-        <div class="grid grid-cols-8 overflow-y-auto p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-4 p-6 my-4">
           {images.map((image, index) => (
             <Card
               className="m-2 p-1"
@@ -78,8 +78,7 @@ function App() {
                 className="flex justify-center items-center"
               >
                 <Button
-                  onClick={(e) => {
-                    console.log(image)
+                  onClick={() => {
                     navigator.clipboard.writeText(image);
                   }}
                 >
