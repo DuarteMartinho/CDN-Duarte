@@ -3,11 +3,13 @@ import { Button, Input, Image } from "@nextui-org/react";
 import axios from "axios";
 import { Toaster, toast } from "sonner";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const handleSubmit = (img, setImg) => {
   if (img !== undefined && img !== null && img !== "") {
     axios({
       method: "post",
-      url: `http://localhost:4444/api/` + img.name,
+      url: `${API_URL}/${img.name}`,
       data: img,
       headers: {
         "Content-Type": img.type,
