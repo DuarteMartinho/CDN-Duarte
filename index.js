@@ -50,7 +50,8 @@ app.post(
         return;
       } else {
         console.log("File saved!");
-        res.status(500).json({ msg: "File saved!" });
+        res.status(200).json({ msg: "File saved!" });
+        return;
       }
     });
   }
