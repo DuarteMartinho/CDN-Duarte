@@ -1,8 +1,8 @@
 version: "3.4"
 services:
-  tournamenthub-backend:
+  cdn-backend:
     image: node:alpine
-    container_name: tournamenthub-backend
+    container_name: cdn-backend
     entrypoint: /bin/sh -c "npm i && npm run start"
     ports:
       - 10903:80
