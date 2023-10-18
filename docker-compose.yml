@@ -19,7 +19,7 @@ services:
     container_name: cdn-frontend
     entrypoint: /bin/sh -c "npm i && npm run start"
     ports:
-      - 10801:80
+      - 10803:80
     working_dir: /srv/app
     environment:
       - VITE_API_URL=https://cdn.duartemartinho.com/api
