@@ -38,10 +38,8 @@ app.post(
   bodyParser.raw({ type: ["image/jpeg", "image/png"], limit: "5mb" }),
   multipartMiddleware,
   async function (req, res) {
-    console.log(req.files, req.body);
     const file = req.body;
-    const name = req.params.name;
-    const fileName = name + ".png";
+    const fileName = req.params.name;
     const filePath = path.join(__dirname, `public/images/${fileName}`);
 
     fs.writeFile(filePath, file, (error) => {
@@ -64,6 +62,8 @@ app.get("/api/*", async function (req, res) {
 
   const query = url.parse(req.url, true).query;
   let file = url.parse(req.url).pathname;
+  file = file.replace("/api/", "");
+  console.log(file);
   let filePath = path.join(__dirname, `public/images/${file}`);
 
   if (!fs.existsSync(filePath)) {
