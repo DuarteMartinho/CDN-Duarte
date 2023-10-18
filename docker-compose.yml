@@ -1,0 +1,16 @@
+version: "3.4"
+services:
+  tournamenthub-backend:
+    image: node:alpine
+    container_name: tournamenthub-backend
+    entrypoint: /bin/sh -c "npm i && npm run start"
+    ports:
+      - 10903:80
+    working_dir: /srv/app
+    environment:
+      - SERVER_PORT=80
+    volumes:
+      - type: bind
+        source: .
+        target: /srv/app
+    tty: true
