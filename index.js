@@ -21,6 +21,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Authorization");
+  next();
+});
+
 app.use(function (err, req, res, next) {
   filePath = path.join(__dirname, process.env.DEFAULT_IMAGE);
   // Display default image if there is error
@@ -35,7 +41,7 @@ app.post(
     console.log(req.files, req.body);
     const file = req.body;
     const name = req.params.name;
-    const fileName = name+".png";
+    const fileName = name + ".png";
     const filePath = path.join(__dirname, `public/images/${fileName}`);
 
     fs.writeFile(filePath, file, (error) => {
