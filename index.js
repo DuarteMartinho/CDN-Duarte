@@ -48,11 +48,11 @@ app.post(
       if (error) {
         res.sendStatus(500).json({ error: error });
         return;
+      } else {
+        console.log("File saved!");
+        res.sendStatus(200);
       }
-      console.log("File saved!");
     });
-
-    res.sendStatus(200);
   }
 );
 
