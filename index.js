@@ -46,11 +46,11 @@ app.post(
 
     fs.writeFile(filePath, file, (error) => {
       if (error) {
-        res.sendStatus(500).json({ error: error });
+        res.status(500).json({ msg: error });
         return;
       } else {
         console.log("File saved!");
-        res.sendStatus(200);
+        res.status(500).json({ msg: "File saved!" });
       }
     });
   }
