@@ -3,7 +3,7 @@ services:
   cdn-backend:
     image: node:alpine
     container_name: cdn-backend
-    entrypoint: /srv/app/deploy-runner.sh
+    entrypoint: /bin/sh -c "/srv/app/deploy-runner.sh"
     ports:
       - 10903:80
     working_dir: /srv/app
