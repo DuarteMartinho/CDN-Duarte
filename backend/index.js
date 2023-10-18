@@ -11,15 +11,14 @@ var multipartMiddleware = multipart();
 
 const app = express();
 
-const corsOptions = {
-  origin:
-    process.env.APP_ORIGIN && process.env.APP_ORIGIN != "*"
-      ? process.env.APP_ORIGIN.split(",")
-      : "*",
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
 app.use(bodyParser.json());
+app.use(bodyParser.json({ type: "text/*" }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -27,31 +26,61 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(function (err, req, res, next) {
-  filePath = path.join(__dirname, process.env.DEFAULT_IMAGE);
-  // Display default image if there is error
-  res.sendFile(filePath);
-});
-
 app.post(
-  "/api/:name",
-  bodyParser.raw({ type: ["image/jpeg", "image/png"], limit: "5mb" }),
+  "/api/*",
+  bodyParser.raw({ type: ["image/*"], limit: "5mb" }),
   multipartMiddleware,
   async function (req, res) {
     const file = req.body;
-    const fileName = req.params.name;
+    let fileName = url.parse(req.url).pathname;
+    fileName = fileName.replace("/api/", "");
     const filePath = path.join(__dirname, `public/images/${fileName}`);
+    const directoryPath = path.dirname(filePath);
 
-    fs.writeFile(filePath, file, (error) => {
-      if (error) {
-        res.status(500).json({ msg: error });
-        return;
+    try {
+      if (!fs.existsSync(directoryPath)) {
+        const result = fs.mkdirSync(directoryPath, { recursive: true });
+        if (result) {
+          fs.writeFile(filePath, file, (error) => {
+            if (error) {
+              res.status(500).json({ msg: error });
+              return;
+            } else {
+              const fileUrl = process.env.CDN_URL + fileName;
+              res.status(200).json({
+                msg: "File saved!",
+                url: fileUrl,
+              });
+              return;
+            }
+          });
+        } else {
+          res.status(500).json({ msg: "Error saving image" });
+          return;
+        }
       } else {
-        console.log("File saved!");
-        res.status(200).json({ msg: "File saved!" });
-        return;
+        fs.writeFile(filePath, file, (error) => {
+          if (error) {
+            res.status(500).json({ msg: error });
+            return;
+          } else {
+            const fileUrl = process.env.CDN_URL + fileName;
+            res.status(200).json({
+              msg: "File saved!",
+              url: fileUrl,
+            });
+            return;
+          }
+        });
       }
-    });
+    } catch (err) {
+      console.log(11, err);
+      res.status(500).json({
+        message: "Something went wrong",
+        error: err.message,
+      });
+      return;
+    }
   }
 );
 
@@ -60,50 +89,66 @@ app.get("/api/*", async function (req, res) {
   res.removeHeader("Transfer-Encoding");
   res.removeHeader("X-Powered-By");
 
-  const query = url.parse(req.url, true).query;
-  let file = url.parse(req.url).pathname;
-  file = file.replace("/api/", "");
-  console.log(file);
-  let filePath = path.join(__dirname, `public/images/${file}`);
+  try {
+    const query = url.parse(req.url, true).query;
+    let file = url.parse(req.url).pathname;
+    file = file.replace("/api/", "");
+    let filePath = path.join(__dirname, `public/images/${file}`);
 
-  if (!fs.existsSync(filePath)) {
-    file = process.env.DEFAULT_IMAGE;
-    filePath = path.join(__dirname, `public/images/${file}`);
-  }
+    if (!fs.existsSync(filePath)) {
+      file = process.env.DEFAULT_IMAGE;
+      filePath = path.join(__dirname, `public/images/${file}`);
+    }
 
-  const height = parseInt(query.h) || 0; // Get height from query string
-  const width = parseInt(query.w) || 0; // Get width from query string
-  const quality = parseInt(query.q) < 100 ? parseInt(query.q) : 99; // Get quality from query string
+    const height = parseInt(query.h) || 0; // Get height from query string
+    const width = parseInt(query.w) || 0; // Get width from query string
+    const quality = parseInt(query.q) < 100 ? parseInt(query.q) : 99; // Get quality from query string
 
-  const folder = `q${quality}_h${height}_w${width}`;
-  const out_file = `public/thumb/${folder}/${file}`;
-  if (fs.existsSync(path.resolve(out_file))) {
-    res.sendFile(path.resolve(out_file));
-    return;
-  }
+    const folder = `q${quality}_h${height}_w${width}`;
+    const out_file = `public/thumb/${folder}/${file}`;
 
-  // If no height or no width display original image
-  if (!height || !width) {
-    res.sendFile(path.resolve(`public/images/${file}`));
-    return;
-  }
+    console.log(2, path.resolve(out_file));
+    if (fs.existsSync(path.resolve(out_file))) {
+      console.log("File exists " + out_file);
+      res.sendFile(path.resolve(out_file));
+      return;
+    }
 
-  // Use jimp to resize image
-  Jimp.read(path.resolve(`public/images/${file}`))
-    .then((lenna) => {
-      lenna.resize(width, height); // resize
-      lenna.quality(quality); // set JPEG quality
-
-      lenna.write(path.resolve(out_file), () => {
-        fs.createReadStream(path.resolve(out_file)).pipe(res);
-      }); // save and display
-    })
-    .catch((err) => {
+    // If no height or no width display original image
+    if (!height || !width) {
       res.sendFile(path.resolve(`public/images/${file}`));
+      return;
+    }
+
+    // Use jimp to resize image
+    Jimp.read(path.resolve(`public/images/${file}`))
+      .then((lenna) => {
+        lenna.resize(width, height); // resize
+        lenna.quality(quality); // set JPEG quality
+
+        lenna.write(path.resolve(out_file), () => {
+          fs.createReadStream(path.resolve(out_file)).pipe(res);
+        }); // save and display
+      })
+      .catch((err) => {
+        console.error(err);
+        res.sendFile(path.resolve(`public/images/${file}`));
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Something went wrong",
+      error: error.message,
     });
+  }
 });
 
 const port = process.env.SERVER_PORT || 4444;
 app.listen(port, () => {
   console.log(`CDN server is running on port ${port}`);
 });
+
+const dir = path.join(__dirname, `public/images/`);
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir, { recursive: true });
+}

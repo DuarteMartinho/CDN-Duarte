@@ -12,4 +12,4 @@ trap 'copy_contents' SIGTERM
 
 # Start your application
 npm i
-npm run start
+npm run dev

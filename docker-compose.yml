@@ -8,6 +8,7 @@ services:
       - 10903:80
     working_dir: /srv/app
     environment:
+      - CDN_URL=https://cdnapi.duartemartinho.com/api/
       - SERVER_PORT=80
     volumes:
       - type: bind
@@ -22,7 +23,7 @@ services:
       - 10803:80
     working_dir: /srv/app
     environment:
-      - VITE_API_URL=https://cdn.duartemartinho.com/api
+      - VITE_API_URL=https://cdnapi.duartemartinho.com/api
     volumes:
       - type: bind
         source: ./frontend
