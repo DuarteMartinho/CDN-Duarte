@@ -57,28 +57,7 @@ app.post(
   }
 );
 
-//   res.send({
-//     status: true,
-//     message: "File is uploaded",
-//     data: {
-//       name: file.name,
-//       mimetype: file.mimetype,
-//       size: file.size,
-//     },
-//   });
-
-//   res.send({
-//     status: true,
-//     message: "File is uploaded",
-//     data: {
-//       name: "file.name",
-//       mimetype: "file.mimetype",
-//       size: "file.size",
-//     },
-//   });
-// });
-
-app.get("*", async function (req, res) {
+app.get("/api/*", async function (req, res) {
   // Remove headers info
   res.removeHeader("Transfer-Encoding");
   res.removeHeader("X-Powered-By");
