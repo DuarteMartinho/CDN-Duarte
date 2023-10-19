@@ -105,9 +105,7 @@ app.get("/*", async function (req, res) {
     const folder = `q${quality}_h${height}_w${width}`;
     const out_file = `public/thumb/${folder}/${file}`;
 
-    console.log(2, path.resolve(out_file));
     if (fs.existsSync(path.resolve(out_file))) {
-      console.log("File exists " + out_file);
       res.sendFile(path.resolve(out_file));
       return;
     }

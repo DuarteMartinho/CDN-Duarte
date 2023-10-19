@@ -9,6 +9,7 @@ services:
     working_dir: /srv/app
     environment:
       - CDN_URL=https://cdnapi.duartemartinho.com
+      - DEFAULT_IMAGE=default.png
       - SERVER_PORT=80
     volumes:
       - type: bind
