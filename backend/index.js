@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
 app.post(
   "/*",
-  bodyParser.raw({ type: ["image/*"], limit: "5mb" }),
+  bodyParser.raw({ type: ["image/*"], limit: "64mb" }),
   multipartMiddleware,
   async function (req, res) {
     const file = req.body;
@@ -73,7 +73,6 @@ app.post(
         });
       }
     } catch (err) {
-      console.log(11, err);
       res.status(500).json({
         message: "Something went wrong",
         error: err.message,
@@ -131,7 +130,6 @@ app.get("/*", async function (req, res) {
         res.sendFile(path.resolve(`public/images/${file}`));
       });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       message: "Something went wrong",
       error: error.message,
